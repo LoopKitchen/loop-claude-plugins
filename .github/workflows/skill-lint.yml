@@ -1,0 +1,48 @@
+name: skill-lint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate plugin manifests
+        run: |
+          for f in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json; do
+            python3 -c 'import json, sys; json.load(open(sys.argv[1]))' "$f" \
+              || { echo "::error::$f is not valid JSON"; exit 1; }
+            echo "ok  $f"
+          done
+
+      - name: Compute changed plugin files
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          git diff --name-only --diff-filter=ACMR \
+            "origin/${{ github.base_ref }}...HEAD" -- plugins > changed.txt
+          echo "Changed plugin files:"
+          cat changed.txt
+
+      - name: Lint changed skills
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ ! -s changed.txt ]; then
+            echo "No plugin files changed."
+            exit 0
+          fi
+          bash .github/scripts/skill-lint.sh $(cat changed.txt)
+
+      - name: Lint every skill
+        if: github.event_name != 'pull_request'
+        run: bash .github/scripts/skill-lint.sh

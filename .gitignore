@@ -1,0 +1,10 @@
+# Filled-in copies of the shipped *.example.* templates carry real channel ids,
+# alert ids, service names and label maps. They must never be committed here.
+plugins/oncall/skills/on-call-report/channels.json
+plugins/oncall/skills/rca/references/routing-table.md
+plugins/oncall/skills/rca/references/alerts.md
+
+# Byproducts of skill-lint's py_compile and editors
+__pycache__/
+*.pyc
+.DS_Store
