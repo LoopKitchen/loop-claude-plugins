@@ -1,0 +1,30 @@
+name: identifier-gate
+
+# Fails the build when any tracked file (except LICENSE and examples/) contains
+# a company-internal identifier: cloud project ids, chat channel/user ids,
+# internal hostnames or IPs, private repository names, employee or customer
+# names. The concrete list of forbidden strings is deliberately not committed
+# to this public repository; it is supplied through the IDENTIFIER_GATE_PATTERNS
+# repository secret (an extended regex). When the secret is absent, for example
+# on pull requests from forks, the script falls back to a generic pattern that
+# matches the *shape* of such identifiers. See .github/scripts/identifier-gate.sh.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Grep for internal identifiers
+        env:
+          IDENTIFIER_GATE_PATTERNS: ${{ secrets.IDENTIFIER_GATE_PATTERNS }}
+        run: bash .github/scripts/identifier-gate.sh

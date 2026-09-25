@@ -1,0 +1,72 @@
+{
+  "_comment": "Starter channel list for the on-call-report skill. Copy this file to channels.json (or point ONCALL_CHANNELS_FILE at your own copy) and replace every name and id with channels from your Slack workspace. Ids here are placeholders, not real Slack ids. Do not commit a filled-in channels.json to a public repository.",
+  "_schema": {
+    "tiers[].tier": "0-4; the skill scans tiers in ascending order and treats each tier as described in SKILL.md",
+    "tiers[].channels[].name": "Slack channel name with the leading #, for display in the report",
+    "tiers[].channels[].id": "Slack channel id, used for mcp__slack__slack_read_channel",
+    "tiers[].channels[].signal": "One line on what shows up in the channel; drives the 'Signal Type' column",
+    "tiers[].channels[].category": "Frontend | Backend | Infra | Customer Impact | Leadership | Product | All (All/Leadership channels are categorized per item)",
+    "tiers[].channels[].role": "Tier 0 only: triage | team | team-oncall | demo | leadership. The report template's {leadership_channel} and {demo_channel} resolve to the channels with those roles"
+  },
+  "tiers": [
+    {
+      "tier": 0,
+      "name": "CTO Always-Monitor",
+      "scan": "every run, first; summarized separately as the CTO Pulse section",
+      "channels": [
+        { "name": "#triage", "id": "C0EXMPL01", "signal": "Cross-team issue triage, prioritization decisions", "category": "All", "role": "triage" },
+        { "name": "#eng-frontend", "id": "C0EXMPL02", "signal": "Frontend team discussion, blockers, decisions", "category": "Frontend", "role": "team" },
+        { "name": "#eng-frontend-oncall", "id": "C0EXMPL03", "signal": "Frontend bug reports, Sentry alerts, user-reported issues", "category": "Frontend", "role": "team-oncall" },
+        { "name": "#eng-backend-oncall", "id": "C0EXMPL04", "signal": "Backend/infra on-call: cloud alerts, dashboards, ingestion", "category": "Backend / Infra", "role": "team-oncall" },
+        { "name": "#sales-demo-help", "id": "C0EXMPL05", "signal": "Demo environment issues, sales demo blockers", "category": "Customer Impact", "role": "demo" },
+        { "name": "#eng-leads", "id": "C0EXMPL06", "signal": "Engineering leads coordination, cross-team decisions", "category": "Leadership", "role": "leadership" }
+      ]
+    },
+    {
+      "tier": 1,
+      "name": "Primary On-Call Channels",
+      "scan": "always",
+      "channels": [
+        { "name": "#alerts-web", "id": "C0EXMPL07", "signal": "Sentry auto-alerts for the web app", "category": "Frontend" },
+        { "name": "#alerts-admin", "id": "C0EXMPL08", "signal": "Sentry auto-alerts for the admin app", "category": "Frontend" },
+        { "name": "#alerts-pipelines", "id": "C0EXMPL09", "signal": "PagerDuty - data pipeline failures", "category": "Infra" },
+        { "name": "#incidents", "id": "C0EXMPL10", "signal": "Declared incidents (incident.io or equivalent)", "category": "All" }
+      ]
+    },
+    {
+      "tier": 2,
+      "name": "Service-Specific Alerts",
+      "scan": "for active or unresolved alerts",
+      "channels": [
+        { "name": "#alerts-payments", "id": "C0EXMPL11", "signal": "PagerDuty - payments service (latency, failed postings)", "category": "Backend" },
+        { "name": "#alerts-api", "id": "C0EXMPL12", "signal": "PagerDuty - public API (errors, polling jobs)", "category": "Backend" },
+        { "name": "#alerts-jobs", "id": "C0EXMPL13", "signal": "Background job and scheduled task failures", "category": "Backend" },
+        { "name": "#alerts-integrations", "id": "C0EXMPL14", "signal": "3rd party integration failures", "category": "Infra" },
+        { "name": "#alerts-agents", "id": "C0EXMPL15", "signal": "AI agent service alerts", "category": "Backend" }
+      ]
+    },
+    {
+      "tier": 3,
+      "name": "Customer Impact & Escalations",
+      "scan": "for open items",
+      "channels": [
+        { "name": "#customer-escalations", "id": "C0EXMPL16", "signal": "High-risk customer issues, churn risk", "category": "Customer Impact" },
+        { "name": "#support", "id": "C0EXMPL17", "signal": "General support requests and support-tool notifications", "category": "Customer Impact" },
+        { "name": "#product-feedback", "id": "C0EXMPL18", "signal": "CS team product feedback and UX issues", "category": "Frontend" },
+        { "name": "#demo-feedback", "id": "C0EXMPL19", "signal": "Demo feedback from sales/CS, UX gaps exposed in demos", "category": "Customer Impact" },
+        { "name": "#onboarding", "id": "C0EXMPL20", "signal": "Customer onboarding issues and blockers", "category": "Customer Impact" }
+      ]
+    },
+    {
+      "tier": 4,
+      "name": "Contextual",
+      "scan": "only when a Tier 0-3 item references them",
+      "channels": [
+        { "name": "#dev-support", "id": "C0EXMPL21", "signal": "Dev support requests", "category": "All" },
+        { "name": "#ci-alerts", "id": "C0EXMPL22", "signal": "CI/CD failures", "category": "Infra" },
+        { "name": "#releases", "id": "C0EXMPL23", "signal": "Deployment/release announcements", "category": "All" },
+        { "name": "#design", "id": "C0EXMPL24", "signal": "Design-dev handoff, UI/UX discussions", "category": "Frontend" }
+      ]
+    }
+  ]
+}

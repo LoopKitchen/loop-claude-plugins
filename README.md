@@ -1,2 +1,138 @@
 # loop-claude-plugins
-Loop AI's public Claude Code plugins: on-call skills (Loki logs, RCA, on-call health report) and engineering workflow skills.
+
+Public [Claude Code](https://code.claude.com/docs/en/plugins) plugins from
+Loop AI. These are the skills our engineers run every day, published with our
+own identifiers (cloud projects, chat channels, hostnames, repositories)
+replaced by a small set of configuration variables. The value is the
+procedure each skill encodes, not the ids, so the method is unchanged.
+
+Two plugins ship from the `loop-plugins` marketplace:
+
+| Plugin | What it is for |
+|---|---|
+| `oncall` | Incident response: query Grafana Loki logs, run a structured root cause analysis, produce an on-call health report |
+| `platform-engineer` | Orchestration: classifies a task, routes it through the `oncall` and `engg` skills (or your own engineer skill), and keeps durable workstream state across sessions |
+
+## Install
+
+```bash
+claude plugin marketplace add LoopKitchen/loop-claude-plugins
+claude plugin install oncall@loop-plugins
+claude plugin install platform-engineer@loop-plugins
+```
+
+Plugins install at user scope (`~/.claude/`) and do not modify any repository.
+Skills are invoked as `/oncall:loki`, `/engg:git`, and so on; the bare name
+(`/loki`, `/git`) also works when no other plugin defines it.
+`platform-engineer` routes to the other plugins, so install them together.
+
+Update later with:
+
+```bash
+claude plugin marketplace update loop-plugins
+```
+
+## Configuration
+
+Every skill reads its settings from environment variables. Set them in the
+shell that launches Claude Code, or in the `env` block of your
+`.claude/settings.json`. Each `SKILL.md` has a "Configuration" section near
+the top listing exactly the variables it reads; the table below is the union.
+
+| Variable | Required | Default | Meaning | Read by |
+|---|---|---|---|---|
+| `LOKI_URL` | yes, for `loki` | none | Base URL of your Grafana Loki gateway, e.g. `https://loki.internal.example.com` | `loki` |
+| `LOKI_AUTH_HEADER` | no | none | Full header for gateways that need one, e.g. `Authorization: Bearer <token>` | `loki` |
+| `GCP_PROJECT` | for `rca` | none | Google Cloud project id of production (log explorer links, `gcloud logging read`) | `rca` |
+| `GCP_STAGING_PROJECT` | no | none | Google Cloud project id of staging | `rca` |
+| `SENTRY_ORG` | for `rca`, `on-call-report` | none | Sentry organisation slug. `pr-review` skips its Sentry cross-reference when unset | `rca`, `on-call-report`, `pr-review` |
+| `SENTRY_REGION_URL` | no | `https://us.sentry.io` | Sentry API base for your org's region | `rca`, `on-call-report`, `pr-review` |
+| `SENTRY_PROJECTS` | for `rca`, `on-call-report` | none (`pr-review`: every project in the org) | Comma-separated Sentry project slugs to scan | `rca`, `on-call-report`, `pr-review` |
+| `SENTRY_AUTH_TOKEN` | for `rca` step 4 | none | Sentry API token (a secret) used by the alert-inventory check | `rca` |
+| `GITHUB_ORG` | for `on-call-report` | none | GitHub organisation whose issues and PRs are scanned; `pr-babysit --sweep` uses it for org-wide sweeps | `on-call-report`, `pr-babysit` |
+| `GITHUB_REPO` | for `rca`, `on-call-report` | inferred from the current checkout by the `engg` skills | `owner/name` of the primary repository; `engg` PR skills use it when the repository cannot be inferred from the checkout | `rca`, `on-call-report`, `pr-review`, `pr-babysit`, `git` |
+| `POSTHOG_PROJECT_ID` | no | none | PostHog project id used to build session-replay and error links | `rca`, `on-call-report` |
+| `APP_URL` | for `rca` | none | Public URL of your main web app | `rca` |
+| `ADMIN_URL` | no | none | URL of your admin app, if separate | `rca` |
+| `API_URL` | no | none | URL of your API host | `rca` |
+| `VERCEL_PROJECTS` | no | none | Comma-separated Vercel project names to check for deployments | `rca` |
+| `RCA_DOCS_DIR` | no | `docs/rca/` | Directory (relative to the repo) where RCA documents are written; `on-call-report` saves reports to its sibling `reports/` directory | `rca`, `on-call-report` |
+| `ONCALL_CHANNELS_FILE` | no | `${CLAUDE_PLUGIN_ROOT}/skills/on-call-report/channels.json` | Tiered Slack channel config; copy `channels.example.json` and fill it in | `on-call-report` |
+| `COMPANY_NAME` | no | `GITHUB_ORG` | Name printed in report titles and document headings | `on-call-report` |
+| `LINEAR_API_KEY` | no | none | Linear personal API key. When unset, `git` skips ticket creation and lookup entirely | `git` |
+| `LINEAR_TEAM_ID` | no | none | Linear team id (UUID) used when creating tickets | `git` |
+
+Linear is optional throughout. Nothing else in these plugins depends on it.
+`platform-engineer` reads no environment variables of its own.
+
+### Files you fill in
+
+Some skills read a config file next to a shipped `*.example.*` template.
+Copy the example, fill it in, and keep the real file out of version control
+(the root `.gitignore` already lists these paths).
+
+| File | Template | Read by |
+|---|---|---|
+| `plugins/oncall/skills/on-call-report/channels.json` (or `ONCALL_CHANNELS_FILE`) | `channels.example.json` | `on-call-report` |
+| `plugins/oncall/skills/rca/references/routing-table.md` | `routing-table.example.md` | `rca` |
+| `plugins/oncall/skills/rca/references/alerts.md` | `alerts.example.md` | `rca` |
+| `.claude/git-labels.json` in your repo (or `plugins/engg/skills/git/labels.json`) | `labels.example.json` | `git` (optional deploy labels) |
+| `~/.claude/platform-engineer.json` | none; optional, never created by the skill | `platform-engineer` (self-augmentation flag, default off) |
+
+### Tools and MCP servers
+
+- `gh` (GitHub CLI), authenticated: `git`, `pr-*`, `plan`, `doc`, `rca`, `on-call-report`.
+- `curl` and `python3`: `loki` (the bundled `parse_logs.py` summarises query results).
+- `gcloud`, authenticated against `GCP_PROJECT`: `rca` log queries.
+- MCP servers named `slack`, `sentry` and `posthog`: `on-call-report`,
+  `rca`, `pr-review` and `evaluate` call `mcp__slack__*`, `mcp__sentry__*`
+  and `mcp__posthog__*` tools. `rca` and `evaluate` can also use `vercel`
+  and `firebase` servers when present. Configure the servers with those
+  names in your Claude Code MCP settings; the skills degrade to CLI and manual
+  steps when a server is missing.
+
+## Plugins
+
+### oncall
+
+| Skill | What it does |
+|---|---|
+| `loki` | Query production logs from Grafana Loki by service, time range, severity and search text; lists services and labels, summarises results with the bundled parser. Triggers on "check logs", "production errors", "what's failing". |
+| `rca` | Root cause analysis for production issues (blank pages, data mismatches, API latency, page load problems) across Sentry, PostHog, cloud logs, Vercel and GitHub, with traceparent correlation; writes an RCA document from the bundled template. |
+| `on-call-report` | On-call health report: scans Slack channels (tiered config), Sentry, GitHub issues and PRs, and PostHog; categorises findings as Frontend / Backend / Infra / Customer impact and emits task briefs an agent can pick up. |
+
+See [`plugins/oncall/README.md`](plugins/oncall/README.md).
+
+### platform-engineer
+
+| Skill | What it does |
+|---|---|
+| `platform-engineer` | The orchestrating entry point for any ask that no single skill owns end to end: classifies the intent, routes each part to the right `oncall` / `engg` skill (or your own language-specific engineer skill), enforces dependency-before-consumer PR ordering, keeps durable workstream state under `docs/workstreams/<slug>/` so any session resumes with one line, and does not return until the definition of done holds. Triggers on "orchestrate", "workstream", "continue", "end to end", "get it live", "sweep", and multi-item task lists. |
+
+It reads no environment variables; see the "Files you fill in" table for the
+optional self-augmentation flag. See
+[`plugins/platform-engineer/README.md`](plugins/platform-engineer/README.md).
+
+## How these were used
+
+<!-- TODO-BLOG: replace this paragraph with a short account of the outage
+these skills were built around and link the write-up. -->
+TODO-BLOG: a write-up of the production incident that shaped `loki`, `rca`
+and `on-call-report`, and what changed in how we run on-call afterwards, is
+coming. Link to follow.
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md). In short: one directory per skill,
+run `.github/scripts/skill-lint.sh` and `.github/scripts/identifier-gate.sh`
+before opening a PR, and never commit a real project id, channel id,
+hostname, token, or customer or employee name.
+
+## Security
+
+See [SECURITY.md](SECURITY.md): GitHub private vulnerability reporting first,
+<security@loopai.com> as the fallback.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Copyright (c) 2026 Loop AI.

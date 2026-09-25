@@ -1,0 +1,20 @@
+{
+  "name": "loop-plugins",
+  "description": "Loop AI public Claude Code plugins: on-call and incident response skills, and an orchestrating platform-engineer skill",
+  "owner": {
+    "name": "Loop AI",
+    "email": "engineering@tryloop.ai"
+  },
+  "plugins": [
+    {
+      "name": "oncall",
+      "source": "./plugins/oncall",
+      "description": "On-call and incident response skills: Grafana Loki log queries, structured root cause analysis, and an on-call health report"
+    },
+    {
+      "name": "platform-engineer",
+      "source": "./plugins/platform-engineer",
+      "description": "Orchestrating skill: classifies a task, routes it to the right specialised skill chain, and keeps durable multi-session workstream state"
+    }
+  ]
+}
