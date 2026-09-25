@@ -7,6 +7,7 @@ description: >-
 argument-hint: "[session_id | path | description] [--local]"
 allowed-tools:
   - Bash(ls *)
+  - Bash(test *)
   - Bash(grep *)
   - Bash(python3 *)
   - Bash(open *)
@@ -14,7 +15,25 @@ allowed-tools:
   - Read
 ---
 
-Share a Claude Code session transcript as an interactive HTML page. Default behavior uploads to GCS and returns a public URL.
+Share a Claude Code session transcript as an interactive HTML page. Default behavior asks your repository's `scripts/session_replayer.py` to upload the page (to wherever that script is configured to upload) and returns the URL it prints.
+
+## Configuration
+
+This skill reads no environment variables. It depends on a script that is **not bundled** with the plugin:
+
+| Dependency | Meaning |
+|------------|---------|
+| `scripts/session_replayer.py` in the current repository | Renders a Claude Code session `.jsonl` into a self-contained HTML page. Expected interface: one positional argument (session id or `.jsonl` path), `-o <output.html>`, and `--upload` (upload the page and print its public URL; the upload target and any credentials are the script's own concern). |
+
+If the script is absent, Step 0 stops the skill with a message; nothing else is attempted.
+
+## Step 0: Check the Replayer Exists
+
+```bash
+test -f scripts/session_replayer.py
+```
+
+If it does not exist, stop and tell the user: the session replayer is not bundled with this plugin; add a `scripts/session_replayer.py` with the interface above to the repository (or run the skill from a repository that has one), then retry.
 
 ## Argument Parsing
 
@@ -25,7 +44,7 @@ Parse `$ARGUMENTS` to determine the input type:
 | UUID (hex with dashes) | Session ID — use directly | `a1b2c3d4-...` |
 | Path ending in `.jsonl` | Session file path — use directly | `~/.claude/projects/.../foo.jsonl` |
 | `--local` | Skip upload, open locally | `--local` |
-| Other text | Natural language description — search for matching session | `"the balance dashboard session"` |
+| Other text | Natural language description — search for matching session | `"the checkout flow session"` |
 | Empty | No args — use most recent session | |
 
 ## Step 1: Find the Session
@@ -71,7 +90,7 @@ ls -t ~/.claude/projects/-${PROJECT_DIR}/*.jsonl | head -1
 
 ## Step 2: Generate and Upload
 
-Run the session replayer script at `scripts/session_replayer.py`:
+Run your repository's session replayer script (checked in Step 0):
 
 ```bash
 python3 scripts/session_replayer.py <session_id_or_path> -o /tmp/session_replay.html --upload

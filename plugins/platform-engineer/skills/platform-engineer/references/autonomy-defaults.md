@@ -160,21 +160,24 @@ created.
   explicit phase logic. Never make the engineer skill unusable because an
   optional loop plugin is missing.
 - Phase-specific artifacts (research.md, requirements.md, design.md, plan.md,
-  subtasks.md, review-notes.md, retrospective.md) live in the skill's session
-  directory, not in the loop plugin.
+  subtasks.md, review-notes.md, retrospective.md) live in the engineer skill's
+  per-task directory if it keeps one, otherwise in
+  `docs/workstreams/<slug>/tasks/<id>/`; never in the loop plugin.
 
 ## Linear ticket creation (optional)
 - Default `create_linear_tickets: false`. Do NOT call Linear integrations
   automatically.
-- Subtasks live in `implementation-plan.md` / `subtasks.md` inside the skill's
-  session directory.
+- Subtasks live in `implementation-plan.md` / `subtasks.md` inside the engineer
+  skill's per-task directory if it keeps one, otherwise in
+  `docs/workstreams/<slug>/tasks/<id>/`.
 - The user may opt in via `tracking: linear` or `create_linear_tickets: true` in
   the prompt; `/git` then uses `LINEAR_API_KEY` / `LINEAR_TEAM_ID` and skips
   Linear when they are unset.
 
 ## Commit + push + PR strategy
-- Branch naming: `claude/<engineer>/<short-task-slug>` (e.g.
-  `claude/engineer/ratelimit-middleware`).
+- Branch naming: `claude/<short-task-slug>` (e.g. `claude/ratelimit-middleware`),
+  which is what `/git --autonomous` creates; the git skill's
+  `references/branch-naming-conventions.md` is the single source.
 - Commit by coherent subtask. Atomic commits preferred. Avoid noisy
   micro-commits AND giant commits.
 - Commit only after relevant validation passes (or commit a known-failing

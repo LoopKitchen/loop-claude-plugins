@@ -1,6 +1,6 @@
 # Sentry alert inventory (example)
 
-Copy this file to `references/alerts.md` and keep it current. The `rca` skill checks it in Step 4 so that no RCA claims "no alerting exists" for a path that already has an alert. Every row below is a placeholder.
+Copy this file to `$RCA_DOCS_DIR/alerts.md` in your repository (default `docs/rca/alerts.md`; not inside the installed plugin, which is replaced on update) and keep it current. The `rca` skill checks it in Step 4 so that no RCA claims "no alerting exists" for a path that already has an alert. Every row below is a placeholder.
 
 Regenerate the rows from the Sentry API (requires `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, and `SENTRY_REGION_URL`):
 

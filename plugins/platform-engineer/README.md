@@ -33,6 +33,7 @@ No environment variables. The skill reads and writes:
 |---|---|
 | `docs/workstreams/<slug>/` in the current repo | Workstream state, created on first use. Commit it or gitignore it per your repo's convention. |
 | `~/.claude/platform-engineer.json` | Optional, user-owned. Read once at close-out for the self-augmentation flag only. Default off; the skill never creates it. |
+| `~/.claude/platform-engineer-augment-ledger.jsonl` | Written only when that flag is on; holds the self-augmentation candidates until a later sweep. Never created otherwise. |
 | `~/.claude/projects/*/memory/` | Claude Code's auto-memory directory, used as the fallback surface for recall and durable-learning capture. |
 
 Optional integrations are probed at session start and never assumed: a

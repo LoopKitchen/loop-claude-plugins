@@ -282,8 +282,7 @@ For each changed file (Critical/High risk), search Sentry for recent issues:
 
 For bugfix PRs, fetch full details of the issue being fixed:
 ```
-mcp__sentry__get_issue_details with organizationSlug: "$SENTRY_ORG", issueId
-mcp__sentry__search_issue_events with organizationSlug: "$SENTRY_ORG", issueId (for stack traces)
+mcp__sentry__get_issue_details with organizationSlug: "$SENTRY_ORG", regionUrl: "$SENTRY_REGION_URL", issueId (its response includes the latest event and its stack trace)
 ```
 
 Compare the Sentry stack trace against the PR's fix location. If they don't align, flag as:

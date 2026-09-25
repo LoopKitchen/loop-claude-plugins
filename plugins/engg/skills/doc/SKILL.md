@@ -5,7 +5,11 @@ description: Search the codebase and create comprehensive documentation as a Git
 
 ## Arguments
 
-- `$ARGUMENTS` — Search query or topic to document (e.g., `journal entry push flow`, `accounting mapping pipeline`)
+- `$ARGUMENTS` — Search query or topic to document (e.g., `order validation flow`, `notification delivery pipeline`)
+
+## Configuration
+
+This skill reads no environment variables and needs no setup beyond an authenticated `gh`.
 
 Search for files and logic related to the user's query. Trace through dependencies and implementations. Create comprehensive documentation including: architecture overview, data flows, corner cases, business logic, and assumptions. Include a tests2write.md section if applicable. Use code references like file_path:line_number.
 

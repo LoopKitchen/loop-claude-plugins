@@ -23,7 +23,7 @@ claude plugin install engg@loop-plugins
 | `deep-understanding` | Deliberate-learning walkthrough of a topic, decision, codebase, paper or bug: "teach me", "walk me through", "quiz me", "ELI5". |
 | `test-fix` | Run pytest and fix failing tests iteratively until green. |
 | `debug-service` | Debug a local development service that will not start or respond: port conflicts, import errors, missing dependencies, configuration. |
-| `share-session` | Export a Claude Code session transcript as an interactive HTML page. Expects a `scripts/session_replayer.py` in the current repository (the replayer is not bundled with the plugin). |
+| `share-session` | Export a Claude Code session transcript as an interactive HTML page. Requires a `scripts/session_replayer.py` in the current repository (the replayer is not bundled with the plugin); the skill stops with a message when it is absent. |
 
 ## Agents
 
@@ -51,7 +51,7 @@ File-based configuration:
 
 | File | Meaning | Read by |
 |---|---|---|
-| `.claude/git-labels.json` in your repo, else `${CLAUDE_PLUGIN_ROOT}/skills/git/labels.json` | Path-prefix to PR-label map for deployment labels; copy `skills/git/labels.example.json`. Absent means the label step is skipped | `git` (and `pr-babysit` relies on it when deploy labels gate merges) |
+| `.claude/git-labels.json` in your repo, else `${CLAUDE_PLUGIN_ROOT}/skills/git/labels.json` | Path-prefix to PR-label map for deployment labels; copy `skills/git/labels.example.json` into your repo as `.claude/git-labels.json`. The `${CLAUDE_PLUGIN_ROOT}` fallback is a read-only cache that plugin updates replace. Absent means the label step is skipped | `git` (and `pr-babysit` relies on it when deploy labels gate merges) |
 
 `codebase-investigator`, `pr-check`, `local-pr-review`, `plan`, `doc`,
 `evaluate`, `deep-understanding`, `test-fix`, `debug-service` and

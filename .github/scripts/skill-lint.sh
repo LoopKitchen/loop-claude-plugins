@@ -38,7 +38,7 @@ while IFS= read -r f; do
 
   # 2. non-portable absolute paths
   for ln in $(grep -nEI "$PATH_RE" "$f" 2>/dev/null | cut -d: -f1); do
-    report "$f:$ln: hardcoded absolute path — use \${SKILL_DIR}/\${CLAUDE_PLUGIN_ROOT} or an env var"
+    report "$f:$ln: hardcoded absolute path — use \${CLAUDE_PLUGIN_ROOT}/skills/<skill>/<file> or an env var"
   done
 
   case "$f" in

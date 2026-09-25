@@ -37,7 +37,14 @@ Nothing here needs an API key. The skill reads and writes:
   close-out for the self-augmentation flag only. Default OFF; the skill never
   creates it (see "Self-augmentation" below).
 - `~/.claude/projects/*/memory/` — Claude Code's auto-memory directory; the
-  fallback surface for recall and for durable-learning capture.
+  fallback surface for recall and for durable-learning capture. Memory files
+  there hold one fact each and are prefixed `reference_` (a durable fact or
+  recipe) or `feedback_` (a behaviour correction); each has one index line in
+  that directory's `MEMORY.md`. That is what "a `reference_*`/`feedback_*`
+  memory file + MEMORY.md line" means below.
+- `~/.claude/platform-engineer-augment-ledger.jsonl` — written only when the
+  self-augmentation flag is on (see "Self-augmentation" below); never created
+  otherwise.
 
 Optional integrations, probed at session start (playbook Step A) and never
 assumed:
@@ -77,9 +84,10 @@ Every invocation belongs to a workstream. Resolve which one:
      definition of done, explicitly-excluded scope.
    - `state.json` — phase, pending checklist, artifacts, PR URLs, blockers.
    Update both at every milestone so any future session resumes from disk.
-   (`docs/workstreams/` is platform-engineer's namespace; dispatched engineer runs
-   keep their own `docs/<engineer>/<task-slug>/` dirs — the workstream brief LINKS
-   to those, it does not replace them.)
+   (`docs/workstreams/` is platform-engineer's namespace. If your engineer skill
+   keeps a per-task directory such as `docs/<engineer>/<task-slug>/`, the
+   workstream brief LINKS to it, it does not replace it; for the by-hand feature
+   chain, per-task artifacts go in `docs/workstreams/<slug>/tasks/<id>/`.)
 3. **Referenced context**: chat permalinks (Slack or similar) → fetch and quote the
    thread NOW (and re-fetch on every resume); prior session ids → mine their
    transcripts and PRs into `brief.md`; design docs → read and link. The user never

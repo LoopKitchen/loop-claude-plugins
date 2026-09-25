@@ -24,7 +24,7 @@ This skill reads the following environment variables. Set them in your shell, a 
 | `COMPANY_NAME` | Company name used in the report title | falls back to `$GITHUB_ORG` |
 | `RCA_DOCS_DIR` | RCA documents directory; saved reports go to its sibling `reports/` directory (`$RCA_DOCS_DIR/../reports/`) | `docs/rca/` (so reports land in `docs/reports/`) |
 
-If `$ONCALL_CHANNELS_FILE` does not exist, stop and ask the user to copy `channels.example.json` to `channels.json` (or point the variable at their own file) and fill in their workspace's channel names and ids. Do not guess channel ids.
+If `$ONCALL_CHANNELS_FILE` does not exist, stop and ask the user to copy `channels.example.json` to a path outside the plugin directory, point `ONCALL_CHANNELS_FILE` at it, and fill in their workspace's channel names and ids. The default next to this file is a fallback for a git clone of the plugin repository only: an installed plugin is a versioned cache that `claude plugin update` and reinstall replace, so a `channels.json` written there is lost. Do not guess channel ids.
 
 ## Quick Reference
 
@@ -69,7 +69,7 @@ mcp__slack__slack_search_public_and_private(
 )
 ```
 Filter for:
-- Messages from team leads or managers (not bots like Geekbot)
+- Messages from team leads or managers (not standup bots)
 - Messages mentioning: "urgent", "blocker", "help", "escalation", "approval", "review"
 - Skip: automated bot messages, standup reminders, calendar notifications
 
@@ -100,7 +100,7 @@ Scan these FIRST (they shape the CTO's situational awareness):
 3. For `team` and `team-oncall` role channels: Extract blockers, bug reports, decisions, active alerts (cloud provider / dashboard signals)
 4. For the `demo` role channel: Extract demo blockers that could affect the sales pipeline
 5. For the `leadership` role channel: Extract leadership decisions, cross-team coordination items
-6. **Personal Pings**: Use `mcp__slack__slack_search_public_and_private` with `query='to:me after:{yesterday_date}'` to find DMs needing CTO attention. Filter out bot messages (Geekbot, calendar bots).
+6. **Personal Pings**: Use `mcp__slack__slack_search_public_and_private` with `query='to:me after:{yesterday_date}'` to find DMs needing CTO attention. Filter out bot messages (standup and calendar bots).
 
 ### 1.1 Slack Scan — Tier 1-3
 

@@ -189,7 +189,6 @@ The current implementation has [specific problem]. This violates [principle] bec
 - Sometimes explicit is better than abstract
 - Balance perfection with shipping features
 - Some technical debt is acceptable if documented
-- Some API keys are hardcoded for simplicity
 
 **Remember:**
 - The best code is no code

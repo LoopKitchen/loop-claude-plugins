@@ -5,6 +5,10 @@ allowed-tools:
   - Bash(gh *)
 ---
 
+## Configuration
+
+This skill reads no environment variables and needs no setup beyond an authenticated `gh`.
+
 1. **Find the PR**: Run `gh pr view --json number,url,title,statusCheckRollup,reviews,comments` for the current branch. If no PR exists, tell the user to run `/git` first.
 2. **Read review comments**: Parse `reviews` and `comments` from step 1 for PR-level feedback. Also fetch inline review comments with `gh api repos/{owner}/{repo}/pulls/{number}/comments`. Summarize all feedback.
 3. **Plan fixes**: Think hard about the feedback. Create a prioritized fix plan for any issues found.

@@ -29,14 +29,25 @@ This skill reads the environment variables below. Set them in your shell profile
 
 ## References
 
+Two files are yours to fill in. They live in your repository under
+`$RCA_DOCS_DIR` (default `docs/rca/`), next to the RCA documents, never inside
+the installed plugin: the plugin directory is a versioned cache that
+`claude plugin update` and reinstall replace, so anything written under
+`${CLAUDE_PLUGIN_ROOT}` is lost. Copy the shipped `*.example.md` templates and
+edit the copies.
+
 - For automated frontend-facing backend 5xx sweeps, load
-  `references/routing-table.md` (your filled-in copy; not shipped)
+  `$RCA_DOCS_DIR/routing-table.md` (your filled-in copy; not shipped)
   before assigning an owner or posting to chat. Create it from
-  [`references/routing-table.example.md`](references/routing-table.example.md):
+  [`references/routing-table.example.md`](references/routing-table.example.md)
+  (`${CLAUDE_PLUGIN_ROOT}/skills/rca/references/routing-table.example.md`):
   it holds the product-channel map, shared-service path overrides, and the
   evidence bar for naming a regression owner.
-- Keep your Sentry alert inventory in `references/alerts.md`, created from
-  [`references/alerts.example.md`](references/alerts.example.md). Step 4 reads it.
+- Keep your Sentry alert inventory in `$RCA_DOCS_DIR/alerts.md`, created from
+  [`references/alerts.example.md`](references/alerts.example.md)
+  (`${CLAUDE_PLUGIN_ROOT}/skills/rca/references/alerts.example.md`). Step 4
+  reads it. If either file is missing, say so in the RCA doc and continue with
+  the live sources.
 
 ## RCA Template & Documentation
 
@@ -129,7 +140,7 @@ The **traceparent** (or `trace_id`) is the single thread that ties the entire re
 3. GCloud HTTP logs capture it as `trace` field
 4. GCloud app logs capture it as `jsonPayload.dict_object.request_id` (or whichever field your request logger uses — adapt the queries below)
 5. Sentry captures it if an error occurs on the same trace
-6. Datadog captures it as `dd.trace_id` for full distributed tracing (DB queries, cache, microservice hops)
+6. If your services also emit Datadog trace ids, Datadog captures it as `dd.trace_id` for full distributed tracing (DB queries, cache, microservice hops); skip the Datadog column otherwise
 
 **One page load = one trace_id = ALL API calls from that load.** Find it in PostHog first, then follow it everywhere.
 
@@ -296,7 +307,7 @@ Organization slug: `$SENTRY_ORG`, Region URL: `$SENTRY_REGION_URL`. Scope search
 
 **B) Check existing Sentry alerts:**
 
-ALWAYS check if alerts already exist for the affected endpoint/page. Never claim "no alerting exists" without verifying first. Check `references/alerts.md` (your copy of `references/alerts.example.md`) and then the live API:
+ALWAYS check if alerts already exist for the affected endpoint/page. Never claim "no alerting exists" without verifying first. Check `$RCA_DOCS_DIR/alerts.md` (your copy of `${CLAUDE_PLUGIN_ROOT}/skills/rca/references/alerts.example.md`) and then the live API:
 
 ```bash
 : "${SENTRY_AUTH_TOKEN:?export a Sentry API token with alert-rule read access}"
@@ -323,7 +334,7 @@ for r in rules:
 "
 ```
 
-If the live list differs from `references/alerts.md`, update the reference file as part of this RCA (see Self-Healing).
+If the live list differs from `$RCA_DOCS_DIR/alerts.md`, update that file as part of this RCA (see Self-Healing).
 
 **→ Update RCA doc:** Record Sentry issue links (or "No Sentry errors found") under Evidence Links. Document any existing alerts in the Detection section — never claim alerting is missing without checking first.
 
@@ -435,7 +446,7 @@ Known backend services (example — replace with your own; the host tells you wh
 
 #### Datadog Trace (if deeper investigation needed)
 
-GCloud logs contain `dd.trace_id` and `dd.span_id` in `jsonPayload`. These can be used to find the full distributed trace in Datadog APM, showing every microservice hop, DB query, and cache call. Look for these fields in the GCloud app logs.
+If your services also emit Datadog trace ids (`dd.trace_id` and `dd.span_id` in `jsonPayload` of the GCloud app logs), the same value opens the full distributed trace in Datadog APM, showing every microservice hop, DB query, and cache call. Skip this section otherwise; no configuration is needed.
 
 ---
 
@@ -696,8 +707,8 @@ Values come from the Configuration section; nothing here is hardcoded.
 | Vercel Projects | `$VERCEL_PROJECTS` |
 | RCA Docs Directory | `$RCA_DOCS_DIR` (default `docs/rca/`) |
 | RCA Template | `${CLAUDE_PLUGIN_ROOT}/skills/rca/references/rca-template.md` |
-| Routing table | `references/routing-table.md` (from `routing-table.example.md`) |
-| Alert inventory | `references/alerts.md` (from `alerts.example.md`) |
+| Routing table | `$RCA_DOCS_DIR/routing-table.md` (from `${CLAUDE_PLUGIN_ROOT}/skills/rca/references/routing-table.example.md`) |
+| Alert inventory | `$RCA_DOCS_DIR/alerts.md` (from `${CLAUDE_PLUGIN_ROOT}/skills/rca/references/alerts.example.md`) |
 
 ### Backend Services
 
@@ -711,7 +722,7 @@ Example rows — replace with your own services. The request host tells you whic
 ## Tips
 
 ### Traceparent is King
-- The `trace_id` in PostHog = `trace` in GCloud HTTP logs = `request_id` in GCloud app logs = `dd.trace_id` in Datadog — SAME value everywhere
+- The `trace_id` in PostHog = `trace` in GCloud HTTP logs = `request_id` in GCloud app logs (= `dd.trace_id` in Datadog, if you run it) — SAME value everywhere
 - One page load = one trace_id shared by ALL API calls from that page load
 - Multiple trace_ids for the same page = user loaded it multiple times (compare request bodies to spot filter changes)
 - Always extract trace_ids FIRST from PostHog, then follow them through GCloud, Sentry, and Datadog
@@ -765,15 +776,15 @@ Re-read this skill file (`Read` tool on `${CLAUDE_PLUGIN_ROOT}/skills/rca/SKILL.
 | **Trace correlation** | Did the traceparent flow (PostHog → GCloud → Sentry → Datadog) work as documented? |
 | **New tools** | Were any new observability tools or MCP servers used that aren't documented here? |
 | **RCA doc** | Did the template copy and per-step updates work? Is `$RCA_DOCS_DIR` still the right location? |
-| **Sentry alerts** | Were existing alerts verified before claiming "no alerting"? Is `references/alerts.md` up to date with the live alert list? |
+| **Sentry alerts** | Were existing alerts verified before claiming "no alerting"? Is `$RCA_DOCS_DIR/alerts.md` up to date with the live alert list? |
 
 ### Fix Issues Found
 
-If any discrepancies were found:
-1. Use the `Edit` tool to fix the specific inaccurate section in this skill file, or in `references/alerts.md` / `references/routing-table.md`
-2. Update the Configuration table if a variable's meaning or default changed
-3. Update HogQL queries if column/table names changed
-4. Keep changes minimal and targeted
+This skill ships inside a plugin, so the installed copy is overwritten on every plugin update. If discrepancies were found:
+1. Record them in the console output under `Self-Healing Log` (see below)
+2. `$RCA_DOCS_DIR/alerts.md` and `$RCA_DOCS_DIR/routing-table.md` are your own files: fix them with the `Edit` tool
+3. If the repo keeps a local override of this skill (`.claude/skills/rca/SKILL.md`), apply skill fixes there with the `Edit` tool (Configuration table, HogQL column/table names, service names) — keep changes minimal and targeted
+4. Otherwise, print the proposed change and open an issue or PR against the plugin repository
 5. Log each fix:
 
    ```

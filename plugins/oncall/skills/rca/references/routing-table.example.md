@@ -1,6 +1,6 @@
 # Backend 5xx ownership and routing (example)
 
-Copy this file to `references/routing-table.md` and fill in your own domains, channels, and on-call groups. The `rca` skill loads it before assigning an owner or posting an automated 5xx RCA. Channel names, channel ids, and group handles below are placeholders.
+Copy this file to `$RCA_DOCS_DIR/routing-table.md` in your repository (default `docs/rca/routing-table.md`; not inside the installed plugin, which is replaced on update) and fill in your own domains, channels, and on-call groups. The `rca` skill loads it before assigning an owner or posting an automated 5xx RCA. Channel names, channel ids, and group handles below are placeholders.
 
 ## Routing rules
 

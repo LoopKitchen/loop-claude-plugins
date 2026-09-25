@@ -10,6 +10,10 @@ Comprehensive evaluation of major technical decisions: migrations, architectural
 
 Use this BEFORE committing engineering effort to a major change. The output is an evaluation document — not code.
 
+## Configuration
+
+This skill reads no environment variables and needs no setup. The optional Sentry, PostHog and Vercel MCP tools in `allowed-tools` are used when present and skipped otherwise.
+
 ## When to Use
 
 Run `/evaluate` when considering:
@@ -520,7 +524,7 @@ path:  docs/evaluations/evaluate-<slug>.md (Markdown)
 *Evaluated by `/evaluate` skill*
 ````
 
-**IMPORTANT**: Store the document `url` and `slug` from the response — they're needed for the verdict phase.
+**IMPORTANT**: Keep the document path (`docs/evaluations/evaluate-<slug>.md`) — Phase 9 updates it in place.
 
 ---
 
@@ -606,7 +610,7 @@ This evaluation can be revisited when conditions change.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Skill: /evaluate
-File:  .claude/skills/evaluate/SKILL.md
+File:  ${CLAUDE_PLUGIN_ROOT}/skills/evaluate/SKILL.md
 ```
 
 **If "Need more information":**
@@ -636,10 +640,11 @@ Re-read this skill file and compare its instructions against what actually happe
 
 ### 10.2 Fix Issues Found
 
-If any discrepancies were found:
-1. Use the `Edit` tool to fix the specific inaccurate section in this skill file
-2. Keep changes minimal and targeted — fix only what's wrong
-3. Log each fix:
+This skill ships inside a plugin, so the installed copy is overwritten on every plugin update. If discrepancies were found:
+1. Record them in the console output under `Self-Healing Log` (see below)
+2. If the repo keeps a local override of this skill (`.claude/skills/evaluate/SKILL.md`), apply the fix there with the `Edit` tool — keep changes minimal and targeted, fix only what's wrong
+3. Otherwise, print the proposed change and open an issue or PR against the plugin repository
+4. Log each fix:
 
 ```
 Self-Healing Log:

@@ -50,17 +50,17 @@ the top listing exactly the variables it reads; the table below is the union.
 | `GCP_STAGING_PROJECT` | no | none | Google Cloud project id of staging | `rca` |
 | `SENTRY_ORG` | for `rca`, `on-call-report` | none | Sentry organisation slug. `pr-review` skips its Sentry cross-reference when unset | `rca`, `on-call-report`, `pr-review` |
 | `SENTRY_REGION_URL` | no | `https://us.sentry.io` | Sentry API base for your org's region | `rca`, `on-call-report`, `pr-review` |
-| `SENTRY_PROJECTS` | for `rca`, `on-call-report` | none (`pr-review`: every project in the org) | Comma-separated Sentry project slugs to scan | `rca`, `on-call-report`, `pr-review` |
+| `SENTRY_PROJECTS` | for `on-call-report` | none (`rca`, `pr-review`: every project in the org) | Comma-separated Sentry project slugs to scan | `rca`, `on-call-report`, `pr-review` |
 | `SENTRY_AUTH_TOKEN` | for `rca` step 4 | none | Sentry API token (a secret) used by the alert-inventory check | `rca` |
 | `GITHUB_ORG` | for `on-call-report` | none | GitHub organisation whose issues and PRs are scanned; `pr-babysit --sweep` uses it for org-wide sweeps | `on-call-report`, `pr-babysit` |
 | `GITHUB_REPO` | for `rca`, `on-call-report` | inferred from the current checkout by the `engg` skills | `owner/name` of the primary repository; `engg` PR skills use it when the repository cannot be inferred from the checkout | `rca`, `on-call-report`, `pr-review`, `pr-babysit`, `git` |
 | `POSTHOG_PROJECT_ID` | no | none | PostHog project id used to build session-replay and error links | `rca`, `on-call-report` |
-| `APP_URL` | for `rca` | none | Public URL of your main web app | `rca` |
+| `APP_URL` | no | none | Public URL of your main web app | `rca` |
 | `ADMIN_URL` | no | none | URL of your admin app, if separate | `rca` |
 | `API_URL` | no | none | URL of your API host | `rca` |
 | `VERCEL_PROJECTS` | no | none | Comma-separated Vercel project names to check for deployments | `rca` |
 | `RCA_DOCS_DIR` | no | `docs/rca/` | Directory (relative to the repo) where RCA documents are written; `on-call-report` saves reports to its sibling `reports/` directory | `rca`, `on-call-report` |
-| `ONCALL_CHANNELS_FILE` | no | `${CLAUDE_PLUGIN_ROOT}/skills/on-call-report/channels.json` | Tiered Slack channel config; copy `channels.example.json` and fill it in | `on-call-report` |
+| `ONCALL_CHANNELS_FILE` | no | `${CLAUDE_PLUGIN_ROOT}/skills/on-call-report/channels.json` | Tiered Slack channel config; copy `channels.example.json` to a path outside the plugin directory and point this at it | `on-call-report` |
 | `COMPANY_NAME` | no | `GITHUB_ORG` | Name printed in report titles and document headings | `on-call-report` |
 | `LINEAR_API_KEY` | no | none | Linear personal API key. When unset, `git` skips ticket creation and lookup entirely | `git` |
 | `LINEAR_TEAM_ID` | no | none | Linear team id (UUID) used when creating tickets | `git` |
@@ -70,17 +70,24 @@ Linear is optional throughout. Nothing else in these plugins depends on it.
 
 ### Files you fill in
 
-Some skills read a config file next to a shipped `*.example.*` template.
-Copy the example, fill it in, and keep the real file out of version control
-(the root `.gitignore` already lists these paths).
+Some skills read a config file you create from a shipped `*.example.*`
+template. Keep the filled-in copy in your own repository or at a path you
+choose, never inside the installed plugin: a marketplace install lives in a
+version-keyed cache directory (`~/.claude/plugins/cache/loop-plugins/<plugin>/<version>/`)
+that is replaced on every `claude plugin update` and reinstall, so anything
+written under `${CLAUDE_PLUGIN_ROOT}` is lost. The `${CLAUDE_PLUGIN_ROOT}`
+defaults below are read-only fallbacks that only make sense in a git clone of
+this repository (whose `.gitignore` keeps the filled-in copies out of version
+control).
 
-| File | Template | Read by |
+| File | Template (in the plugin) | Read by |
 |---|---|---|
-| `plugins/oncall/skills/on-call-report/channels.json` (or `ONCALL_CHANNELS_FILE`) | `channels.example.json` | `on-call-report` |
-| `plugins/oncall/skills/rca/references/routing-table.md` | `routing-table.example.md` | `rca` |
-| `plugins/oncall/skills/rca/references/alerts.md` | `alerts.example.md` | `rca` |
-| `.claude/git-labels.json` in your repo (or `plugins/engg/skills/git/labels.json`) | `labels.example.json` | `git` (optional deploy labels) |
+| `ONCALL_CHANNELS_FILE=/path/outside/the/plugin/channels.json` (fallback `${CLAUDE_PLUGIN_ROOT}/skills/on-call-report/channels.json`) | `skills/on-call-report/channels.example.json` | `on-call-report` |
+| `$RCA_DOCS_DIR/routing-table.md` in your repo (default `docs/rca/routing-table.md`) | `skills/rca/references/routing-table.example.md` | `rca` |
+| `$RCA_DOCS_DIR/alerts.md` in your repo (default `docs/rca/alerts.md`) | `skills/rca/references/alerts.example.md` | `rca` |
+| `.claude/git-labels.json` in your repo (fallback `${CLAUDE_PLUGIN_ROOT}/skills/git/labels.json`) | `skills/git/labels.example.json` | `git` (optional deploy labels) |
 | `~/.claude/platform-engineer.json` | none; optional, never created by the skill | `platform-engineer` (self-augmentation flag, default off) |
+| `~/.claude/platform-engineer-augment-ledger.jsonl` | none; written by the skill only when that flag is on | `platform-engineer` (self-augmentation ledger) |
 
 ### Tools and MCP servers
 
@@ -140,14 +147,6 @@ See [`plugins/engg/README.md`](plugins/engg/README.md).
 It reads no environment variables; see the "Files you fill in" table for the
 optional self-augmentation flag. See
 [`plugins/platform-engineer/README.md`](plugins/platform-engineer/README.md).
-
-## How these were used
-
-<!-- TODO-BLOG: replace this paragraph with a short account of the outage
-these skills were built around and link the write-up. -->
-TODO-BLOG: a write-up of the production incident that shaped `loki`, `rca`
-and `on-call-report`, and what changed in how we run on-call afterwards, is
-coming. Link to follow.
 
 ## Contributing
 
