@@ -6,11 +6,12 @@ own identifiers (cloud projects, chat channels, hostnames, repositories)
 replaced by a small set of configuration variables. The value is the
 procedure each skill encodes, not the ids, so the method is unchanged.
 
-Two plugins ship from the `loop-plugins` marketplace:
+Three plugins ship from the `loop-plugins` marketplace:
 
 | Plugin | What it is for |
 |---|---|
 | `oncall` | Incident response: query Grafana Loki logs, run a structured root cause analysis, produce an on-call health report |
+| `engg` | Day-to-day engineering: git and PR lifecycle, PR review and babysitting, codebase investigation, plans and design docs, plus two review agents |
 | `platform-engineer` | Orchestration: classifies a task, routes it through the `oncall` and `engg` skills (or your own engineer skill), and keeps durable workstream state across sessions |
 
 ## Install
@@ -18,13 +19,15 @@ Two plugins ship from the `loop-plugins` marketplace:
 ```bash
 claude plugin marketplace add LoopKitchen/loop-claude-plugins
 claude plugin install oncall@loop-plugins
+claude plugin install engg@loop-plugins
 claude plugin install platform-engineer@loop-plugins
 ```
 
 Plugins install at user scope (`~/.claude/`) and do not modify any repository.
 Skills are invoked as `/oncall:loki`, `/engg:git`, and so on; the bare name
 (`/loki`, `/git`) also works when no other plugin defines it.
-`platform-engineer` routes to the other plugins, so install them together.
+`platform-engineer` routes to the other two, so install all three for the
+full set of routes.
 
 Update later with:
 
@@ -102,6 +105,31 @@ Copy the example, fill it in, and keep the real file out of version control
 | `on-call-report` | On-call health report: scans Slack channels (tiered config), Sentry, GitHub issues and PRs, and PostHog; categorises findings as Frontend / Backend / Infra / Customer impact and emits task briefs an agent can pick up. |
 
 See [`plugins/oncall/README.md`](plugins/oncall/README.md).
+
+### engg
+
+| Skill | What it does |
+|---|---|
+| `git` | Branch from the default branch, run the repo's formatter, commit, push and open a PR in one command; standardised branch naming; optional Linear ticket creation or lookup; resolves addressed review threads. |
+| `pr-review` | Deep, multi-stage PR review from a principal engineer's perspective: triage, specialised passes, risk classification, security pass, cross-package impact, line-level GitHub comments. |
+| `pr-check` | After pushing: fetch review comments, plan the fixes, check CI status. |
+| `pr-babysit` | Carry one or more PRs from "opened" to "merged and deployed" without polling; sweep a backlog of open PRs; follow up on merged PRs with unresolved threads. |
+| `local-pr-review` | Offline review of a PR that produces a structured markdown report an agent can implement fixes from. |
+| `codebase-investigator` | Find where a feature is implemented, trace data flows, explain how something works, find the PR that introduced a change. No configuration required. |
+| `plan` | Write a detailed implementation plan as a GitHub issue, with alternatives and trade-offs. |
+| `doc` | Search the codebase and document a system, module or pattern as an engineering design doc in a GitHub issue. |
+| `evaluate` | Go/no-go evaluation of a major change: external research, blast radius, risks, metrics, test strategy, recommendation; writes the evaluation to `docs/evaluations/`. |
+| `deep-understanding` | Deliberate-learning walkthrough of a topic, codebase, decision or paper ("teach me", "walk me through", "quiz me"). |
+| `test-fix` | Run pytest and fix failing tests iteratively. |
+| `debug-service` | Debug a local development service that will not start or respond: ports, imports, dependencies, configuration. |
+| `share-session` | Export a Claude Code session transcript as an interactive HTML page. Expects a `scripts/session_replayer.py` in the current repository; the replayer is not bundled. |
+
+| Agent | What it does |
+|---|---|
+| `code-optimizer` | Optimisation-focused review: duplication, performance, security and testing gaps, written up as a prioritised report with before/after examples. |
+| `security-reviewer` | OWASP-style security review of authentication, authorisation, input handling, data access and credential use. |
+
+See [`plugins/engg/README.md`](plugins/engg/README.md).
 
 ### platform-engineer
 

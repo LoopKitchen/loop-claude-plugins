@@ -1,0 +1,8 @@
+{
+  "services": [
+    { "prefix": "services/api/", "label": "service:api" },
+    { "prefix": "services/worker/", "label": "service:worker" }
+  ],
+  "shared": ["libs/common/"],
+  "skip": ["docs/", ".github/", "scripts/"]
+}

@@ -1,6 +1,6 @@
 {
   "name": "loop-plugins",
-  "description": "Loop AI public Claude Code plugins: on-call and incident response skills, and an orchestrating platform-engineer skill",
+  "description": "Loop AI public Claude Code plugins: on-call and incident response skills, engineering workflow skills, and an orchestrating platform-engineer skill",
   "owner": {
     "name": "Loop AI",
     "email": "engineering@tryloop.ai"
@@ -10,6 +10,11 @@
       "name": "oncall",
       "source": "./plugins/oncall",
       "description": "On-call and incident response skills: Grafana Loki log queries, structured root cause analysis, and an on-call health report"
+    },
+    {
+      "name": "engg",
+      "source": "./plugins/engg",
+      "description": "Engineering workflow skills: git and PR lifecycle, code review, codebase investigation, planning and design docs, plus two review agents"
     },
     {
       "name": "platform-engineer",

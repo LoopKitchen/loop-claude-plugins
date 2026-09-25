@@ -3,6 +3,7 @@
 plugins/oncall/skills/on-call-report/channels.json
 plugins/oncall/skills/rca/references/routing-table.md
 plugins/oncall/skills/rca/references/alerts.md
+plugins/engg/skills/git/labels.json
 
 # Byproducts of skill-lint's py_compile and editors
 __pycache__/
