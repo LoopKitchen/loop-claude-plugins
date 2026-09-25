@@ -7,14 +7,18 @@ description: Local code review of a PR with structured markdown report output. U
 
 - `$ARGUMENTS` — PR number (e.g., `123`)
 
+## Configuration
+
+This skill reads no environment variables and needs no setup beyond an authenticated `gh`.
+
 Perform a comprehensive local code review of PR $ARGUMENTS following the LEVER optimization principles. Generate a structured markdown report that an AI agent can use to implement fixes.
 
-First, read and internalize the optimization principles from `/optimization-principles.md`.
+First, read `${CLAUDE_PLUGIN_ROOT}/agents/code-optimizer.md` (the LEVER / SAFE / ADAPT / TEST review-pattern catalog) and `${CLAUDE_PLUGIN_ROOT}/skills/pr-review/references/lever-framework.md`, and internalize the optimization principles.
 
 **CRITICAL SETUP - Clean Checkout**:
 1. Stash any current changes: `git stash -u`
-2. Switch to main: `git checkout main`
-3. Pull latest: `git pull`
+2. Detect the default branch: `git symbolic-ref --short refs/remotes/origin/HEAD` (strip the `origin/` prefix; fall back to `main` if the command fails) and use it as `{default}`
+3. Switch to it and pull: `git checkout {default} && git pull`
 4. Checkout PR: `gh pr checkout $ARGUMENTS`
 
 **Ultrathink** about the code - look for deep optimization opportunities.
@@ -26,10 +30,10 @@ First, read and internalize the optimization principles from `/optimization-prin
    - Get the diff: `gh pr diff $ARGUMENTS`
 
 2. **Analyze Against LEVER Framework**:
-   Read the LEVER framework from [../pr-review/references/lever-framework.md](../pr-review/references/lever-framework.md).
+   Read the LEVER framework from `${CLAUDE_PLUGIN_ROOT}/skills/pr-review/references/lever-framework.md`.
 
 3. **Focus Areas**:
-   See the Focus Areas section in [../pr-review/references/lever-framework.md](../pr-review/references/lever-framework.md).
+   See the Focus Areas section in `${CLAUDE_PLUGIN_ROOT}/skills/pr-review/references/lever-framework.md`.
 
 ## Report Generation
 

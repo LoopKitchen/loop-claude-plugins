@@ -17,7 +17,7 @@
         { "name": "#triage", "id": "C0EXMPL01", "signal": "Cross-team issue triage, prioritization decisions", "category": "All", "role": "triage" },
         { "name": "#eng-frontend", "id": "C0EXMPL02", "signal": "Frontend team discussion, blockers, decisions", "category": "Frontend", "role": "team" },
         { "name": "#eng-frontend-oncall", "id": "C0EXMPL03", "signal": "Frontend bug reports, Sentry alerts, user-reported issues", "category": "Frontend", "role": "team-oncall" },
-        { "name": "#eng-backend-oncall", "id": "C0EXMPL04", "signal": "Backend/infra on-call: cloud alerts, dashboards, ingestion", "category": "Backend / Infra", "role": "team-oncall" },
+        { "name": "#eng-backend-oncall", "id": "C0EXMPL04", "signal": "Backend/infra on-call: cloud alerts, dashboards, ingestion", "category": "Backend", "role": "team-oncall" },
         { "name": "#sales-demo-help", "id": "C0EXMPL05", "signal": "Demo environment issues, sales demo blockers", "category": "Customer Impact", "role": "demo" },
         { "name": "#eng-leads", "id": "C0EXMPL06", "signal": "Engineering leads coordination, cross-team decisions", "category": "Leadership", "role": "leadership" }
       ]

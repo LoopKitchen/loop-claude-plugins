@@ -128,7 +128,10 @@ the PR body alongside the size math (base size, median, added, trimmed).
    protocol may be stricter, never looser, for these entries.
 3. Score survivors (recurrence × severity × breadth) and batch all entries for
    the SAME target skill into ONE proportional PR (never per-finding PRs),
-   authored in a worktree per repo conventions.
+   authored in a worktree per repo conventions. The PR targets a checkout of
+   the repository that publishes the target skill (for a marketplace skill, a
+   clone of that marketplace; never the installed plugin cache). If no such
+   checkout exists, mark the entries `blocked:no-repo` and report.
 4. The PR body carries: per-entry evidence (workstreams, dates, verbatim quotes),
    the size math, and a dedicated **GATED CONTENT** section listing every touched
    line that is frontmatter, a table, a step procedure, a DoD item, or contains
